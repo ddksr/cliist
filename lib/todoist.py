@@ -31,7 +31,7 @@ def api_call(method, **options):
     except Exception as ex:
         print(ex)
 
-def prepare_task_info(cinfo):
+def prepare_task_info(cinfo, due_date=None):
     labels, project = [], None
     if cinfo.get('labels'):
         all_labels = list_labels(cinfo, stdout=False,
@@ -48,14 +48,17 @@ def prepare_task_info(cinfo):
                 project = proj
                 break
     args = {}
-    if cinfo['content'].strip():
-        args['content'] = cinfo['content']
+    content = cinfo.get('content', '')
+    if content.strip():
+        args['content'] = content
     if project:
         args['project_id'] = project['id']
     if labels:
         args['labels'] = [label['id'] for label in labels]
-    if cinfo['priority']:
+    if cinfo.get('priority'):
         args['priority'] = int(cinfo['priority'])
+    if due_date:
+        args['date_string'] = due_date
     return labels, project, args
 
 def query(info, stdout=True):
@@ -77,7 +80,7 @@ def complete_tasks(cinfo):
 def add_task(cinfo, due_date=None):
     if not cinfo:
         return None
-    labels, project, api_args = prepare_task_info(cinfo)
+    labels, project, api_args = prepare_task_info(cinfo, due_date)
     if 'priority' not in api_args:
         api_args['priority'] = 1
     if 'content' not in api_args:
@@ -85,9 +88,9 @@ def add_task(cinfo, due_date=None):
     api_call('addItem', **api_args)
 
 def edit_task(cinfo, edit_id, due_date=None):
-    if not cinfo:
+    if not cinfo and not due_date:
         return None
-    labels, project, api_args = prepare_task_info(cinfo)
+    labels, project, api_args = prepare_task_info(cinfo, due_date)
     api_args['id'] = edit_id
     api_call('updateItem', **api_args)
     

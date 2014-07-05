@@ -45,7 +45,7 @@ def content_info(content_raw):
     }
 
 def date(date_str):
-    if EU_DATE.math(date_str):
+    if EU_DATE.match(date_str):
         return date_str.replace('.', '/')
     return date_str
 
