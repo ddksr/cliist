@@ -9,8 +9,10 @@ from lib import models
 QUERY_DELIMITER = re.compile(', *')
 API_URL = 'https://api.todoist.com/API'
 TASK_FORMAT = '{c0}{indent} - {taskid:10} {priority}{c1}{content} {c2}{due}'
+
 def ulist(l):
     return json.dumps(l).replace(' ', '')
+
 
 def api_call(method, **options):
     options['token'] = API_TOKEN
@@ -29,62 +31,7 @@ def api_call(method, **options):
     except Exception as ex:
         print(ex)
 
-def print_task(task, search=None, date=None):
-    indent = '  ' * (int(task.get('indent', '1')) - 1)
-    due_date = task.get('due_date', '')
-    if not due_date:
-        due_date = ''
-    content = task.get('content', '')
-    taskid = task.get('id')
-    priority = task.get('priority', '')
-    if priority and priority != 1:
-        priority = '{}!!{} '.format(colors.PRIORITY,
-                                        priority)
-    else:
-        priority = ''
-            
-    print(TASK_FORMAT.format(c0=colors.ENDC,
-                             c1=colors.CONTENT,
-                             c2=colors.DATE,
-                             indent=indent,
-                             priority=priority,
-                             due=due_date,
-                             content=content,
-                             taskid=taskid))
-            
-        
-def print_tasks_list(result):
-    for project_or_task in result[0]['data']:
-        if project_or_task.get('content'):
-            print_task(project_or_task)
-        else:
-            project_name = project_or_task.get('project_name')
-            print('{}#{}'.format(colors.PROJECT,
-                                 project_name))
-            for task in project_or_task.get('uncompleted', []):
-                print_task(task)
-
-
-def query(info, stdout=True):
-    queries = ['view all']
-    if info:
-        queries = ulist(QUERY_DELIMITER.split(info['merged']))
-    
-    result = api_call('query', queries=queries)
-    result_set = models.ResultSet(result, info['merged'])
-    if stdout:
-        result_set.pprint()
-    return result_set
-
-
-def complete_tasks(cinfo):
-    api_call('completeItems', ids=[
-        int(taskid) for taskid in cinfo['raw']
-    ])
-
-def add_task(cinfo, due_date):
-    if not cinfo:
-        return None
+def prepare_task_info(cinfo):
     labels, project = [], None
     if cinfo.get('labels'):
         all_labels = list_labels(cinfo, stdout=False,
@@ -100,18 +47,50 @@ def add_task(cinfo, due_date):
             if cinfo.get('project') == proj['name']:
                 project = proj
                 break
-    args = {
-        'content': cinfo['content']
-    }
+    args = {}
+    if cinfo['content'].strip():
+        args['content'] = cinfo['content']
     if project:
         args['project_id'] = project['id']
     if labels:
         args['labels'] = [label['id'] for label in labels]
     if cinfo['priority']:
         args['priority'] = int(cinfo['priority'])
-    else:
-        args['priority'] = 1
-    api_call('addItem', **args)
+    return labels, project, args
+
+def query(info, stdout=True):
+    queries = ['view all']
+    if info:
+        queries = ulist(QUERY_DELIMITER.split(info['merged']))
+    
+    result = api_call('query', queries=queries)
+    result_set = models.ResultSet(result, info['merged'])
+    if stdout:
+        result_set.pprint()
+    return result_set
+
+def complete_tasks(cinfo):
+    api_call('completeItems', ids=[
+        int(taskid) for taskid in cinfo['raw']
+    ])
+
+def add_task(cinfo, due_date=None):
+    if not cinfo:
+        return None
+    labels, project, api_args = prepare_task_info(cinfo)
+    if 'priority' not in api_args:
+        api_args['priority'] = 1
+    if 'content' not in api_args:
+        api_args['content'] = '...'
+    api_call('addItem', **api_args)
+
+def edit_task(cinfo, edit_id, due_date=None):
+    if not cinfo:
+        return None
+    labels, project, api_args = prepare_task_info(cinfo)
+    api_args['id'] = edit_id
+    api_call('updateItem', **api_args)
+    
 
 def list_labels(cinfo, stdout=True, do_search=True):
     result = api_call('getLabels')

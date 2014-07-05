@@ -63,7 +63,7 @@ def command(args, options):
     elif options.projects:
         todoist.list_projects(cinfo)
     elif options.edit_id:
-        todoist.edit_task(options.edit_id, cinfo, due_date)
+        todoist.edit_task(cinfo, options.edit_id, due_date)
     else:
         todoist.list_tasks(cinfo, due_date)
         

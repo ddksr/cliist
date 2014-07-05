@@ -32,7 +32,7 @@ class Task(dict):
         priority = ''
         if self.priority and self.priority != 1:
             priority = '{}{}{} '.format(colors.PRIORITY,
-                                        self.priority,
+                                        (5 - self.priority),
                                         colors.ENDC)
         due = self.get_date()
         if due:
