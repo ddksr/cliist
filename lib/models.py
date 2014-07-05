@@ -1,5 +1,5 @@
-from settings import colors
-from datetime import datetime, date, timedelta
+from settings import colors, OUTPUT_DATE_FORMAT
+from datetime import datetime
 
 
 class Task(dict):
@@ -17,15 +17,24 @@ class Task(dict):
             else:
                 self.due_date = datetime.strptime(due_date,
                                                   '%a %d %b %Y %H:%M:%S')
- 
+        self.sort_date = self.due_date or datetime(1500, 1, 1)
+        
         self.project = task_raw.get('project')
         self.priority = int(task_raw.get('priority', '1'))
         self.labels = task_raw.get('labels', [])
+        self.content = task_raw.get('content', '')
+        self.raw = task_raw
 
     def get_date(self):
         if self.due_date:
-            return self.due_date.strftime('%d.%m.%Y @ %H:%M:%S')
+            return self.due_date.strftime(OUTPUT_DATE_FORMAT)
         return ''
+
+    def get_key(self, order):
+        key = getattr(self, order)
+        if type(key) == str:
+            return key.lower()
+        return key
         
     def pprint(self):
         indent = '  ' * (int(self.get('indent', '1')) - 1)
@@ -38,13 +47,13 @@ class Task(dict):
         if due:
             due += ' '
         print(Task.FORMAT.format(c0=colors.ENDC,
-                                  c1=colors.CONTENT,
-                                  c2=colors.DATE,
-                                  indent=indent,
-                                  priority=priority,
-                                  content=self.get('content'),
-                                  due=due,
-                                  taskid=self.get('id')), end='')
+                                 c1=colors.CONTENT,
+                                 c2=colors.DATE,
+                                 indent=indent,
+                                 priority=priority,
+                                 content=self.get('content'),
+                                 due=due,
+                                 taskid=self.get('id')), end='')
 
 class TaskSet(list):
     COLORS = {
@@ -75,38 +84,52 @@ class TaskSet(list):
             self.append(Task(task))
         self.raw = result
 
-    def select(self, order=None, reverse=False, search=None, **filters):
+    def copy(self):
+        copied = TaskSet(set_type=self.set_type)
+        copied.set_type = self.set_type
+        copied.extend(self)
+        copied.raw = self.raw
+        return copied
+
+    def select(self, order=None, reverse=False, search=None, filters={}):
         if search:
             filters['search'] = search
-        filtered = self
+        filtered = self.copy()
         for filtername, filterval in filters.items():
             filtered = filter(TaskSet.FILTERS[filtername](filterval), filtered)
         if order:
-            return list(sorted(filtered, key=lambda task: task[order],
-                               reverse=reverse))
-        return filtered
+            filtered = sorted(filtered, key=lambda task: task.get_key(order))
+        filtered=list(filtered)
+        selected = TaskSet(set_type=self.set_type)
+        selected.raw = self.raw
+        for item in (reverse and filtered[::-1] or filtered):
+            selected.append(item)
+        return selected
         
-    def pprint(self, **options):
+    def pprint(self):
         color = TaskSet.COLORS[self.set_type]
         print(TaskSet.FORMAT[self.set_type].format(color=color,
                                                    **self.raw), end='')
-        for task in self.select(**options):
+        for task in self:
             task.pprint()
         
         
 class ResultSet:
-    def __init__(self, result, name=None):
+    def __init__(self, result, name=None, **options):
         self.task_sets = []
         self.tasks = TaskSet()
         self.name = name
-        for resultset in result:
+        self.raw = result
+        for resultset in result or []:
             for item in resultset['data']:
                 if item.get('content'):
                     self.tasks.append(Task(item))
                 else:
-                    self.task_sets.append(TaskSet(item))
+                    self.task_sets.append(TaskSet(item).select(**options))
+        if options:
+            self.tasks = self.tasks.select(**options)
                     
-    def pprint(self, search=None, filters=None, order=None):
+    def pprint(self):
         if self.name:
             print('{}{}\n{}{}\n'.format(colors.FILTER, self.name,
                                     ''.join('=' for _ in self.name),
@@ -115,3 +138,6 @@ class ResultSet:
             task_set.pprint()
         if self.tasks:
             self.tasks.pprint()
+
+    def select(self, **options):
+        return ResultSet(self.raw, name=self.name, **options)

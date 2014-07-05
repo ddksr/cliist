@@ -1,9 +1,12 @@
 API_TOKEN=''
+OUTPUT_DATE_FORMAT='%d.%m.%Y @ %H:%M:%S'
 
 class colors:
-    HEADER = '\033[95m'
-    OKBLUE = '\033[94m'
-    OKGREEN = '\033[92m'
-    WARNING = '\033[93m'
+    PROJECT = '\033[95m'
+    FILTER = '\033[95m'
+    LABEL = '\033[94m'
+    CONTENT = '\033[92m'
+    DATE = '\033[93m'
+    PRIORITY = '\033[96m'
     FAIL = '\033[91m'
     ENDC = '\033[0m'

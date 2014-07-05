@@ -1,9 +1,14 @@
+from datetime import date
 import re
 
 from lib import todoist
-import settings
 
 EU_DATE = re.compile('\d{1,2}\.\d{1,2}\.\d{2}(\d{2})?')
+ORDER_OPTIONS = {
+    'c': 'content',
+    'p': 'priority',
+    'd': 'sort_date',
+}
 
 def is_word_label(word):
     return word and word[0] == '@'
@@ -13,6 +18,20 @@ def is_word_project(word):
 
 def is_word_priority(word):
     return len(word) > 2 and word[:2] == '!!' and word[2:].isdigit()
+
+
+def str_date(date_str):
+    y, m, d = 2000, 1, 1
+    if '-' in date_str:
+        y, m, d = date_str.split('-')
+    if '.' in date_str:
+        d, m, y = date_str.split('.')
+    return date(y, m, d)
+    
+def todoist_date(date_str):
+    if EU_DATE.match(date_str):
+        return date_str.replace('.', '/')
+    return date_str
     
 def content_info(content_raw):
     content = []
@@ -41,29 +60,46 @@ def content_info(content_raw):
         'raw': content_raw,
         'labels': raw_labels,
         'project': project,
-        'priority': priority
+        'priority': priority,
     }
 
-def date(date_str):
-    if EU_DATE.match(date_str):
-        return date_str.replace('.', '/')
-    return date_str
-
+def get_filters(options):
+    filters = {}
+    if options.gte_date:
+        filters['gte'] = str_date(options.gte_date)
+    if options.lte_date:
+        filters['lte'] = str_date(options.lte_date)
+    if options.lt_date:
+        filters['lt'] = str_date(options.lt_date)
+    if options.gt_date:
+        filters['gt'] = str_date(options.gt_date)
+    if options.eq_date:
+        filters['eq'] = str_date(options.eq_date)
+    if options.neq_date:
+        filters['neq'] = str_date(options.neq_date)
+    return filters
+    
 def command(args, options):
     cinfo = args and content_info(args) or {}
-    due_date = options.date and date(options.date) or None
+    
+    list_opts = {
+        'filters': get_filters(options),
+        'reverse': options.reverse,
+        'order': ORDER_OPTIONS.get(options.order)
+    }
+    due_date = options.date and todoist_date(options.date) or None
     if options.query:
-        todoist.query(cinfo)
+        todoist.query(cinfo, options.query, **list_opts)
     elif options.complete:
         todoist.complete_tasks(cinfo)
     elif options.add_task:
         todoist.add_task(cinfo, due_date)
     elif options.labels:
-        todoist.list_labels(cinfo)
+        todoist.list_labels(cinfo, reverse=options.reverse)
     elif options.projects:
-        todoist.list_projects(cinfo)
+        todoist.list_projects(cinfo, reverse=options.reverse)
     elif options.edit_id:
         todoist.edit_task(cinfo, options.edit_id, due_date)
     else:
-        todoist.list_tasks(cinfo, due_date)
+        todoist.list_tasks(cinfo, due_date, **list_opts)
         

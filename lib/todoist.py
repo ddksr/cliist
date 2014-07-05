@@ -3,7 +3,7 @@ import urllib.request
 import json
 import re
 
-from settings import colors, API_TOKEN
+from settings import API_TOKEN
 from lib import models
 
 QUERY_DELIMITER = re.compile(', *')
@@ -11,7 +11,7 @@ API_URL = 'https://api.todoist.com/API'
 TASK_FORMAT = '{c0}{indent} - {taskid:10} {priority}{c1}{content} {c2}{due}'
 
 def ulist(l):
-    return json.dumps(l).replace(' ', '')
+    return json.dumps(l).replace(', ', ',')
 
 
 def api_call(method, **options):
@@ -61,13 +61,11 @@ def prepare_task_info(cinfo, due_date=None):
         args['date_string'] = due_date
     return labels, project, args
 
-def query(info, stdout=True):
-    queries = ['view all']
-    if info:
-        queries = ulist(QUERY_DELIMITER.split(info['merged']))
+def query(info, query, stdout=True, **options):
+    queries = QUERY_DELIMITER.split(query)
     
-    result = api_call('query', queries=queries)
-    result_set = models.ResultSet(result, info['merged'])
+    result = api_call('query', queries=ulist(queries))
+    result_set = models.ResultSet(result, query or 'view all', **options)
     if stdout:
         result_set.pprint()
     return result_set
@@ -95,20 +93,20 @@ def edit_task(cinfo, edit_id, due_date=None):
     api_call('updateItem', **api_args)
     
 
-def list_labels(cinfo, stdout=True, do_search=True):
+def list_labels(cinfo, stdout=True, do_search=True, reverse=False):
     result = api_call('getLabels')
     search = do_search and cinfo.get('merged')
-    for label in result:
+    for label in reverse and result[::-1] or result:
         if search and search.lower() not in label.lower():
             continue
         if stdout:
             print('@' + label)
     return result
     
-def list_projects(cinfo, stdout=True, do_search=True):
+def list_projects(cinfo, stdout=True, do_search=True, reverse=False):
     result = api_call('getProjects')
     search = do_search and cinfo.get('merged')
-    for project in result:
+    for project in reverse and result[::-1] or result:
         name = project['name']
         if search and search.lower() not in name.lower():
             continue
@@ -117,11 +115,13 @@ def list_projects(cinfo, stdout=True, do_search=True):
             print(indent + '#' + name)
     return result
 
-def list_tasks(cinfo, date, stdout=True):
+def list_tasks(cinfo, due_date, stdout=True, **options):
     result = api_call('query', queries=ulist([
-        'view all' + (date and '& {}'.format(date) or '')
+        'view all' + (due_date and '& {}'.format(due_date) or '')
     ]))
-    result_set = models.ResultSet(result)
+    if cinfo:
+        options['search'] = cinfo.get('merged')
+    result_set = models.ResultSet(result, **options)
     if stdout:
         result_set.pprint()
     return result_set

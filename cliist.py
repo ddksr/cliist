@@ -4,48 +4,95 @@ from optparse import OptionParser
 
 from lib import process
 
+USAGE = "usage: %prog [options] task_content|search_string|task_id"
+DESC = """Simple Todoist console client.
+If no options and arguments specified, list of all uncompleted tasks grouped
+by project is listed. If only date (-d) is specified, list of all uncompleted tasks on that date is listed (also grouped by project).
+Note: because ! is a special bash character, you can write %% instead of !!"""
+
 def main():
-    parser = OptionParser(usage="usage: %prog [options] task_content|search_string")
+    parser = OptionParser(usage=USAGE,
+                          description=DESC)
 
     parser.add_option('-d', '--date',
                       dest='date',
                       default=None,
-                      help='Todoist due date')
-
+                      help='Todoist due date formatted in Todoist date format. Available when no other options specified and when adding or editing tasks.')
+    
+    parser.add_option('-s', '--sort',
+                      dest='order',
+                      default=None,
+                      help='Sort todoist tasks by content (c), priority (p) or due date (d). Available every time a list of tasks is listed.')
+    
+    parser.add_option('-r', '--reverse',
+                      dest='reverse',
+                      action='store_true',
+                      default=False,
+                      help='Reverse the list. Available every time tasks, projects or labels are listed.')
+    
     parser.add_option('-e', '--edit',
                       dest='edit_id',
                       default=None,
-                      help='Todoist edit specified task content')
+                      help='Edit specified task content. Specify content with arguments.')
 
     parser.add_option('-q', '--query',
                       dest='query',
-                      action='store_true',
-                      default=False,
-                      help='Todoist query')
+                      default=None,
+                      help='Query tasks using Todoist search queries as arguments.')
 
     parser.add_option('-c', '--complete',
                       dest='complete',
                       action='store_true',
-                      default=False,
-                      help='Mark tasks completed')
+                      default=None,
+                      help='Mark tasks completed (arguments are task ids).')
 
     parser.add_option('-a', '--add',
                       dest='add_task',
                       action='store_true',
                       default=False,
-                      help='Todoist add task')
+                      help='Todoist add task where content as arguments.')
 
     parser.add_option('-l', '--labels',
                       dest='labels',
                       action='store_true',
                       default=False,
-                      help='Todoist list labels')
+                      help='List Todoist labels.')
 
     parser.add_option('-p', '--projects',
                       dest='projects',
                       action='store_true',
                       default=False,
-                      help='Todoist list projects')
+                      help='List Todoist projects.')
+
+    parser.add_option('--gte',
+                      dest='gte_date',
+                      default=None,
+                      help='List tasks with due date greater or equal than GTE_DATE')
+
+    parser.add_option('--lte',
+                      dest='lte_date',
+                      default=None,
+                      help='List tasks with due date less or equal to LTE_DATE')
+
+    parser.add_option('--gt',
+                      dest='gt_date',
+                      default=None,
+                      help='List tasks with due date greater than GT_DATE')
+
+    parser.add_option('--lt',
+                      dest='lt_date',
+                      default=None,
+                      help='List tasks with due date less than LT_DATE')
+
+    parser.add_option('--eqaul',
+                      dest='eq_date',
+                      default=None,
+                      help='List tasks with due date equal to EQ_DATE')
+
+    parser.add_option('--not-equal',
+                      dest='neq_date',
+                      default=None,
+                      help='List tasks with due date not equal to NEQ_DATE')
 
     options, args = parser.parse_args()
     process.command(args, options)
