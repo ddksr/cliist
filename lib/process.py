@@ -76,7 +76,6 @@ def get_filters(options):
         filters['eq'] = str_date(options.eq_date)
     if options.neq_date:
         filters['neq'] = str_date(options.neq_date)
-    print(filters)
     return filters
     
 def command(args, options):
