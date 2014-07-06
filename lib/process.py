@@ -1,6 +1,5 @@
 from datetime import date
 import re
-
 from lib import todoist
 
 EU_DATE = re.compile('\d{1,2}\.\d{1,2}\.\d{2}(\d{2})?')
@@ -26,7 +25,7 @@ def str_date(date_str):
         y, m, d = date_str.split('-')
     if '.' in date_str:
         d, m, y = date_str.split('.')
-    return date(y, m, d)
+    return date(int(y), int(m), int(d))
     
 def todoist_date(date_str):
     if EU_DATE.match(date_str):
@@ -77,6 +76,7 @@ def get_filters(options):
         filters['eq'] = str_date(options.eq_date)
     if options.neq_date:
         filters['neq'] = str_date(options.neq_date)
+    print(filters)
     return filters
     
 def command(args, options):

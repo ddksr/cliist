@@ -17,7 +17,7 @@ class Task(dict):
             else:
                 self.due_date = datetime.strptime(due_date,
                                                   '%a %d %b %Y %H:%M:%S')
-        self.sort_date = self.due_date or datetime(1500, 1, 1)
+        self.sort_date = (self.due_date or datetime(1500, 1, 1)).replace(tzinfo=None)
         
         self.project = task_raw.get('project')
         self.priority = int(task_raw.get('priority', '1'))
@@ -66,12 +66,12 @@ class TaskSet(list):
         'unknown': '',
     }
     FILTERS = {
-        'gte': lambda val: (lambda item: item.due_date >= val),
-        'lte': lambda val: (lambda item: item.due_date <= val),
-        'gt': lambda val: (lambda item: item.due_date > val),
-        'lt': lambda val: (lambda item: item.due_date < val),
-        'eq': lambda val: (lambda item: item.due_date == val),
-        'neq': lambda val: (lambda item: item.due_date != val),
+        'gte': lambda val: (lambda item: item.sort_date.date() >= val),
+        'lte': lambda val: (lambda item: item.sort_date.date() <= val),
+        'gt': lambda val: (lambda item: item.sort_date.date() > val),
+        'lt': lambda val: (lambda item: item.sort_date.date() < val),
+        'eq': lambda val: (lambda item: item.sort_date.date() == val),
+        'neq': lambda val: (lambda item: item.sort_date.date() != val),
         'search': lambda val: (lambda item: val.lower() in item['content'].lower()),
     }
     def __init__(self, result = {}, set_type='unknown'):
