@@ -18,7 +18,7 @@ Run installation script and type in your API token:
 
 ## Examples
 
-### List all tasks
+### List all tasks for today and that are overdue
 Input: `./cliist.py`
 
 Output:
@@ -30,7 +30,7 @@ Overdue and today
 - 12345678 06.07.2014 @ 21:59:59 task 2 for today
 ```
 
-### List all tasks with a search string
+### List the tasks with a search string
 Input: `./cliist.py that`
 
 Output:
