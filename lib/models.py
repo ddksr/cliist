@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 class Task(dict):
-    FORMAT = '{c0}{indent} - {taskid:10} {priority}{c2}{due}{c1}{content}\n'
+    FORMAT = '{c0}{indent}  -{taskid:>9} {priority}{c2}{due}{c1}{content}\n'
     def __init__(self, task_raw):
         for key, val in task_raw.items():
             self[key] = val
@@ -62,7 +62,7 @@ class TaskSet(list):
         'set': colors.ENDC
     }
     FORMAT = {
-        'project': '{color}#{project_name}\n',
+        'project': '{color} #{project_name}\n',
         'unknown': '',
     }
     FILTERS = {
@@ -121,6 +121,9 @@ class ResultSet:
         self.name = name
         self.raw = result
         for resultset in result or []:
+            if resultset.get('content'):
+                self.tasks.append(Task(resultset))
+                continue
             for item in resultset['data']:
                 if item.get('content'):
                     self.tasks.append(Task(item))
@@ -128,10 +131,10 @@ class ResultSet:
                     self.task_sets.append(TaskSet(item).select(**options))
         if options:
             self.tasks = self.tasks.select(**options)
-                    
+
     def pprint(self):
         if self.name:
-            print('{}{}\n{}{}\n'.format(colors.FILTER, self.name,
+            print('{}{}\n{}{}'.format(colors.FILTER, self.name,
                                     ''.join('=' for _ in self.name),
                                     colors.ENDC))
         for task_set in self.task_sets:

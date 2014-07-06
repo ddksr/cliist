@@ -90,6 +90,8 @@ def command(args, options):
     due_date = options.date and todoist_date(options.date) or None
     if options.query:
         todoist.query(cinfo, options.query, **list_opts)
+    elif options.all:
+        todoist.query(cinfo, 'view all', **list_opts)
     elif options.complete:
         todoist.complete_tasks(cinfo)
     elif options.add_task:
@@ -100,6 +102,8 @@ def command(args, options):
         todoist.list_projects(cinfo, reverse=options.reverse)
     elif options.edit_id:
         todoist.edit_task(cinfo, options.edit_id, due_date)
+    elif options.project_name:
+        todoist.project_tasks(cinfo, options.project_name, **list_opts)
     else:
         todoist.list_tasks(cinfo, due_date, **list_opts)
         

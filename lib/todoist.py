@@ -61,11 +61,27 @@ def prepare_task_info(cinfo, due_date=None):
         args['date_string'] = due_date
     return labels, project, args
 
+def project_tasks(cinfo, project_name, stdout=True, **options):
+    all_projects = list_projects(cinfo, stdout=False,
+                                 do_search=False)
+    project_id = None
+    for proj in all_projects:
+        if project_name == proj['name']:
+            project_id = proj.get('id')
+            break
+    if not project_id:
+        return
+    result = api_call('getUncompletedItems', project_id=project_id)
+    result_set = models.ResultSet(result, query or 'view all', **options)
+    if stdout:
+        result_set.pprint()
+    return result_set
+    
 def query(info, query, stdout=True, **options):
     queries = QUERY_DELIMITER.split(query)
-    
     result = api_call('query', queries=ulist(queries))
     result_set = models.ResultSet(result, query or 'view all', **options)
+
     if stdout:
         result_set.pprint()
     return result_set
@@ -77,12 +93,14 @@ def complete_tasks(cinfo):
 
 def add_task(cinfo, due_date=None):
     if not cinfo:
+        print('Task has no content!')
         return None
     labels, project, api_args = prepare_task_info(cinfo, due_date)
+    if 'content' not in api_args:
+        print('Task has no content!')
+        return None
     if 'priority' not in api_args:
         api_args['priority'] = 1
-    if 'content' not in api_args:
-        api_args['content'] = '...'
     api_call('addItem', **api_args)
 
 def edit_task(cinfo, edit_id, due_date=None):
@@ -116,12 +134,10 @@ def list_projects(cinfo, stdout=True, do_search=True, reverse=False):
     return result
 
 def list_tasks(cinfo, due_date, stdout=True, **options):
-    result = api_call('query', queries=ulist([
-        'view all' + (due_date and '& {}'.format(due_date) or '')
-    ]))
+    result = api_call('query', queries=ulist(['overdue','today']))
     if cinfo:
         options['search'] = cinfo.get('merged')
-    result_set = models.ResultSet(result, **options)
+    result_set = models.ResultSet(result, name='Overdue and today', **options)
     if stdout:
         result_set.pprint()
     return result_set

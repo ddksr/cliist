@@ -6,8 +6,7 @@ from lib import process
 
 USAGE = "usage: %prog [options] task_content|search_string|task_id"
 DESC = """Simple Todoist console client.
-If no options and arguments specified, list of all uncompleted tasks grouped
-by project is listed. If only date (-d) is specified, list of all uncompleted tasks on that date is listed (also grouped by project).
+If no options and arguments specified, all uncompleted tasks for today and overdue are listed.
 Note: because ! is a special bash character, you can write %% instead of !!"""
 
 def main():
@@ -52,17 +51,28 @@ def main():
                       default=False,
                       help='Todoist add task where content as arguments.')
 
-    parser.add_option('-l', '--labels',
+    parser.add_option('-L', '--labels',
                       dest='labels',
                       action='store_true',
                       default=False,
                       help='List Todoist labels.')
 
-    parser.add_option('-p', '--projects',
+    parser.add_option('-P', '--projects',
                       dest='projects',
                       action='store_true',
                       default=False,
                       help='List Todoist projects.')
+
+    parser.add_option('-p', '--project-tasks',
+                      dest='project_name',
+                      default=False,
+                      help='List Todoist project tasks.')
+    
+    parser.add_option('-A', '--all',
+                      dest='all',
+                      action='store_true',
+                      default=False,
+                      help='List all uncompleted todoist tasks.')
 
     parser.add_option('--gte',
                       dest='gte_date',
