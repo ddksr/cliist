@@ -72,7 +72,7 @@ def project_tasks(cinfo, project_name, stdout=True, **options):
     if not project_id:
         return
     result = api_call('getUncompletedItems', project_id=project_id)
-    result_set = models.ResultSet(result, query or 'view all', **options)
+    result_set = models.ResultSet(result, project_name or 'view all', **options)
     if stdout:
         result_set.pprint()
     return result_set

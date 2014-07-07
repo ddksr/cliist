@@ -135,7 +135,7 @@ class ResultSet:
     def pprint(self):
         if self.name:
             print('{}{}\n{}{}'.format(colors.FILTER, self.name,
-                                    ''.join('=' for _ in self.name),
+                                      ''.join('=' for _ in self.name or ''),
                                     colors.ENDC))
         for task_set in self.task_sets:
             task_set.pprint()
