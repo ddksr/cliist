@@ -72,3 +72,45 @@ Output:
 - 12345678 12.07.2014 @ 21:59:59 another happy task
 ```
 
+## All features
+cliist features can be easily listed with `cliist -h`:
+```
+~  ○ cliist -h                                                                                                                                                                [17:48:41]
+Usage: cliist [options] task_content|search_string|task_id
+
+Simple Todoist console client. If no options and arguments specified, all
+uncompleted tasks for today and overdue are listed. Note: because ! is a
+special bash character, you can write %% instead of !!
+
+Options:
+  -h, --help            show this help message and exit
+  -d DATE, --date=DATE  Todoist due date formatted in Todoist date format.
+                        Available when no other options specified and when
+                        adding or editing tasks.
+  -s ORDER, --sort=ORDER
+                        Sort todoist tasks by content (c), priority (p) or due
+                        date (d). Available every time a list of tasks is
+                        listed.
+  -r, --reverse         Reverse the list. Available every time tasks, projects
+                        or labels are listed.
+  -e EDIT_ID, --edit=EDIT_ID
+                        Edit specified task content. Specify content with
+                        arguments.
+  -q QUERY, --query=QUERY
+                        Query tasks using Todoist search queries as arguments.
+  -c, --complete        Mark tasks completed (arguments are task ids).
+  -a, --add             Todoist add task where content as arguments.
+  -L, --labels          List Todoist labels.
+  -P, --projects        List Todoist projects.
+  -p PROJECT_NAME, --project-tasks=PROJECT_NAME
+                        List Todoist project tasks.
+  -A, --all             List all uncompleted todoist tasks.
+  --gte=GTE_DATE        List tasks with due date greater or equal than
+                        GTE_DATE
+  --lte=LTE_DATE        List tasks with due date less or equal to LTE_DATE
+  --gt=GT_DATE          List tasks with due date greater than GT_DATE
+  --lt=LT_DATE          List tasks with due date less than LT_DATE
+  --eqaul=EQ_DATE       List tasks with due date equal to EQ_DATE
+  --not-equal=NEQ_DATE  List tasks with due date not equal to NEQ_DATE
+```
+
