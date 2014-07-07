@@ -84,7 +84,8 @@ def command(args, options):
     list_opts = {
         'filters': get_filters(options),
         'reverse': options.reverse,
-        'order': ORDER_OPTIONS.get(options.order)
+        'order': ORDER_OPTIONS.get(options.order),
+        'search': cinfo.get('merged'),
     }
     due_date = options.date and todoist_date(options.date) or None
     if options.query:
