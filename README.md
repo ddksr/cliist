@@ -3,7 +3,7 @@ cliist
 
 Todoist commandline client is an asynchronous client for the Todoist todo-list web application.
 It currently supports:
-- addint/updating tasks
+- adding/updating tasks
 - marking tasks complete
 - listing all tasks
 - listing project tasks
@@ -57,7 +57,7 @@ Output:
 #Proj4
 ```
 
-### Add a task for project Proj 1 with doe date today and label @happy and first priority
+### Add a task for project Proj 1 with due date today and label @happy and of first priority
 Input: `./cliist.py -a a very important task @happy #Proj1 %%4` (cliist uses %%4 instead of !!4 because ! is a special character in bash).
 
 ### Query 
