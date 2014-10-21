@@ -3,7 +3,7 @@ from datetime import datetime
 
 
 class Task(dict):
-    FORMAT = '{c0}{indent}  -{taskid:>9} {priority}{c2}{due}{c1}{content}\n'
+    FORMAT = '{c0}{indent}  -{taskid:>9} {c2}{due}{priority}{c1}{content}\n'
     def __init__(self, task_raw):
         for key, val in task_raw.items():
             self[key] = val
@@ -38,7 +38,7 @@ class Task(dict):
         
     def pprint(self):
         indent = '  ' * (int(self.get('indent', '1')) - 1)
-        priority = ''
+        priority = '  '
         if self.priority and self.priority != 1:
             priority = '{}{}{} '.format(colors.PRIORITY,
                                         (5 - self.priority),
