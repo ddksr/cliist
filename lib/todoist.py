@@ -61,6 +61,13 @@ def prepare_task_info(cinfo, due_date=None):
         args['date_string'] = due_date
     return labels, project, args
 
+def list_cache():
+    cached = models.ResultSet.load()
+    if cached is None:
+        print ('Cache is empty')
+        return
+    cached.pprint()
+
 def project_tasks(cinfo, project_name, stdout=True, **options):
     all_projects = list_projects(cinfo, stdout=False,
                                  do_search=False)

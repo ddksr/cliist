@@ -104,6 +104,8 @@ def command(args, options):
         todoist.edit_task(cinfo, options.edit_id, due_date)
     elif options.project_name:
         todoist.project_tasks(cinfo, options.project_name, **list_opts)
+    elif options.cached:
+        todoist.list_cache()
     else:
         todoist.list_tasks(cinfo, due_date, **list_opts)
         

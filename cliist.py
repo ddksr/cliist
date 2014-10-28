@@ -104,6 +104,12 @@ def main():
                       default=None,
                       help='List tasks with due date not equal to NEQ_DATE')
 
+    parser.add_option('--cached',
+                      dest='cached',
+                      action='store_true',
+                      default=False,
+                      help='List cached resultset.')
+
     options, args = parser.parse_args()
     process.command(args, options)
     
