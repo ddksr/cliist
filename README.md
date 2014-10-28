@@ -145,7 +145,8 @@ Options:
                         arguments.
   -q QUERY, --query=QUERY
                         Query tasks using Todoist search queries as arguments.
-  -c, --complete        Mark tasks completed (arguments are task ids).
+  -c, --complete        Mark tasks completed (arguments are task ids or search
+                        queries).
   -a, --add             Todoist add task where content as arguments.
   -L, --labels          List Todoist labels.
   -P, --projects        List Todoist projects.
