@@ -103,7 +103,7 @@ today, tomorrow
 
 Complete two tasks via ID. Input: `cliist -c 12345672 12345671`
 You can also use a search string. Input: `cliist -c 'normal task'`
-The complete command also works with recurring tasks but ***only if you listed the task one command before***. If you didn't, the task will be marked completed and will not appear on the next recurring date.
+The complete command also works with recurring tasks but ***only if the task appeared in the last listing command***. If it didn't, the task will be marked completed and will not appear on the next recurring date.
 
 Let's list the tasks again. Input: ``
 
