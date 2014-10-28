@@ -43,7 +43,7 @@ def main():
                       dest='complete',
                       action='store_true',
                       default=None,
-                      help='Mark tasks completed (arguments are task ids).')
+                      help='Mark tasks completed (arguments are task ids or search queries).')
 
     parser.add_option('-a', '--add',
                       dest='add_task',
