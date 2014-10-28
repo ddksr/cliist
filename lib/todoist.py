@@ -4,7 +4,8 @@ import json
 import re
 
 from settings import API_TOKEN
-from lib import models
+from . import models
+from .utils import CliistException
 
 QUERY_DELIMITER = re.compile(', *')
 API_URL = 'https://api.todoist.com/API'
@@ -61,11 +62,42 @@ def prepare_task_info(cinfo, due_date=None):
         args['date_string'] = due_date
     return labels, project, args
 
+def get_taks(cinfo):
+    cached = models.ResultSet.load()
+    ids_recurring, ids_normal = [], []
+    for task_raw in cinfo['raw']:
+        if task_raw.isdigit():
+            task_id = int(task_raw)
+            if cached:
+                task = cached.lookup_one(task_raw)
+                if task is not None and task.is_recurring:
+                    ids_recurring.append(task_id)
+                    continue
+                
+            ids_normal.append(task_id)
+        elif cached is not None:
+            result = cached.lookup(task_raw)
+            if len(result) > 1:
+                raise CliistException('Too many cached results for {}.\nNo tasks were marked completed'.format(task_raw))
+
+            elif len(result) < 1:
+                raise CliistException('No cached results for "{}".\nNo tasks were marked completed'.format(task_raw))
+            else:
+                task = result[0]
+                task_id = task.get('id')
+                if task.is_recurring:
+                    ids_recurring.append(task_id)
+                else:
+                    ids_normal.append(task_id)
+        else:
+            raise CliistException('No chached results. Please list your tasks with cliist to enable task lookup.\nNo tasks were marked completed')
+    return ids_normal + ids_normal, ids_normal, ids_recurring
+
+
 def list_cache():
     cached = models.ResultSet.load()
     if cached is None:
-        print ('Cache is empty')
-        return
+        raise CliistException('Cache is empty')
     cached.pprint()
 
 def project_tasks(cinfo, project_name, stdout=True, **options):
@@ -94,39 +126,7 @@ def query(info, query, stdout=True, **options):
     return result_set
 
 def complete_tasks(cinfo):
-    cached = models.ResultSet.load()
-    ids_normal, ids_recurring = [], []
-    for task_raw in cinfo['raw']:
-        if task_raw.isdigit():
-            task_id = int(task_raw)
-            if cached:
-                task = cached.lookup_one(task_raw)
-                if task is not None and task.is_recurring:
-                    ids_recurring.append(task_id)
-                    continue
-                
-            ids_normal.append(task_id)
-        elif cached is not None:
-            result = cached.lookup(task_raw)
-            if len(result) > 1:
-                print ('Too many cached results for {}'.format(task_raw))
-                print ('No tasks were marked completed')
-                return
-            elif len(result) < 1:
-                print ('No cached results for "{}"'.format(task_raw))
-                print ('No tasks were marked completed')
-                return
-            else:
-                task = result[0]
-                task_id = task.get('id')
-                if task.is_recurring:
-                    ids_recurring.append(task_id)
-                else:
-                    ids_normal.append(task_id)
-        else:
-            print ('No chached results. Please list your tasks with cliist to enable task lookup.')
-            print ('No tasks were marked completed')
-            return
+    ids, ids_normal, ids_recurring = get_taks(cinfo)
 
     if ids_normal:
         api_call('completeItems', ids=ids_normal)
@@ -135,19 +135,20 @@ def complete_tasks(cinfo):
 
 def add_task(cinfo, due_date=None):
     if not cinfo:
-        print('Task has no content!')
-        return None
+        raise CliistException('Task has no content!')
     labels, project, api_args = prepare_task_info(cinfo, due_date)
     if 'content' not in api_args:
-        print('Task has no content!')
-        return None
+        raise CliistException('Task has no content!')
     if 'priority' not in api_args:
         api_args['priority'] = 1
     api_call('addItem', **api_args)
 
 def edit_task(cinfo, edit_id, due_date=None):
-    if not cinfo and not due_date:
-        return None
+    if not cinfo:
+        raise CliistException('No task content')
+    if not due_date:
+        raise CliistException('No due date')
+    # TODO: could use lookup
     labels, project, api_args = prepare_task_info(cinfo, due_date)
     api_args['id'] = edit_id
     api_call('updateItem', **api_args)

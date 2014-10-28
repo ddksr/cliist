@@ -3,6 +3,7 @@
 from optparse import OptionParser
 
 from lib import process
+from lib.utils import CliistException
 
 USAGE = "usage: %prog [options] task_content|search_string|task_id"
 DESC = """Simple Todoist console client.
@@ -111,7 +112,10 @@ def main():
                       help='List cached resultset.')
 
     options, args = parser.parse_args()
-    process.command(args, options)
+    try:
+        process.command(args, options)
+    except CliistException as msg:
+        print(msg)
     
 if __name__ == '__main__':
     main()
