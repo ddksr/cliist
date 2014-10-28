@@ -12,9 +12,14 @@ It currently supports:
 
 The client is currently tested only with Todoist Premium.
 
+Every listed resultset is cached to the OS. This is helpful when you want to mark tasks completed. 
+
 ## Instalation
 Run installation script and type in your API token:
 `./install.sh`
+
+## Updating
+Please check if there are any new settings in `settings.py.template` and add them to your local settings. I will try to figure out a better way of updating the application in the future.
 
 ## Examples
 
@@ -71,6 +76,48 @@ Output:
 - 12345677 !1 a very important task
 - 12345678 12.07.2014 @ 21:59:59 another happy task
 ```
+
+### Completing tasks
+
+First we add three types of tasks. Input:
+
+
+```
+cliist -a -d today normal task
+cliist -a -d 'ev day' recurring task
+cliist -a something for the future 
+```
+
+List all tasks for today. Input: `cliist -q 'today, tomorrow'`
+
+Output:
+
+```
+today, tomorrow
+===============
+  - 12345671 28.10.2014 @ 23:59:59   some task from before
+  - 12345672 28.10.2014 @ 23:59:59   another some task from before
+  - 12345673 28.10.2014 @ 23:59:59   normal task
+  - 12345673 28.10.2014 @ 23:59:59   recurring task
+```
+
+Complete two tasks via ID. Input: `cliist -c 12345672 12345671`
+You can also use a search string. Input: `cliist -c 'normal task'`
+The complete command also works with recurring tasks but ***only if you listed the task one command before***. If you didn't, the task will be marked completed and will not appear on the next recurring date.
+
+Let's list the tasks again. Input: ``
+
+Output:
+
+```
+today, tomorrow
+===============
+  - 12345673 29.10.2014 @ 23:59:59   recurring task
+```
+
+***Warning***: Search string can only be used if you used a listing command before and the task appeared in the list. In this example we used `cliist -q today`.
+
+
 
 ## All features
 cliist features can be easily listed with `cliist -h`:

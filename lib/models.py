@@ -1,5 +1,13 @@
-from settings import colors, OUTPUT_DATE_FORMAT
 from datetime import datetime
+import json
+import os.path
+
+from settings import colors, OUTPUT_DATE_FORMAT
+
+try:
+    from settings import CACHE_ENABLED, CACHE
+except:
+    CACHE_ENABLED, CACHE = False, ''
 
 
 class Task(dict):
@@ -24,6 +32,14 @@ class Task(dict):
         self.labels = task_raw.get('labels', [])
         self.content = task_raw.get('content', '')
         self.raw = task_raw
+        self.date_string = task_raw.get('date_string', '')
+        self.is_recurring = any([
+            'every ' in self.date_string,
+            'ev ' in self.date_string
+        ])
+
+    def serialize(self):
+        return json.dumps(self)
 
     def get_date(self):
         if self.due_date:
@@ -35,6 +51,9 @@ class Task(dict):
         if type(key) == str:
             return key.lower()
         return key
+
+    def __hash__(self):
+        return self.get('id')
         
     def pprint(self):
         indent = '  ' * (int(self.get('indent', '1')) - 1)
@@ -84,6 +103,9 @@ class TaskSet(list):
             self.append(Task(task))
         self.raw = result
 
+    def serialize(self):
+        return json.dumps(self)
+
     def copy(self):
         copied = TaskSet(set_type=self.set_type)
         copied.set_type = self.set_type
@@ -112,10 +134,21 @@ class TaskSet(list):
                                                    **self.raw), end='')
         for task in self:
             task.pprint()
+
+    def lookup(self, task_info):
+        results = set()
+        for task in self:
+            if task_info.isdigit():
+                task_id = int(task_info)
+                if task_id and task_id == int(task.get('id', 0)):
+                    results.add(task)
+            elif task_info.lower() in task.get('content').lower():
+                results.add(task)
+        return results
         
         
 class ResultSet:
-    def __init__(self, result, name=None, **options):
+    def __init__(self, result, name=None, no_save=False, **options):
         self.task_sets = []
         self.tasks = TaskSet()
         self.name = name
@@ -132,6 +165,9 @@ class ResultSet:
         if options:
             self.tasks = self.tasks.select(**options)
 
+        if not no_save:
+            self.save()
+
     def pprint(self):
         if self.name:
             print('{}{}\n{}{}'.format(colors.FILTER, self.name,
@@ -144,3 +180,43 @@ class ResultSet:
 
     def select(self, **options):
         return ResultSet(self.raw, name=self.name, **options)
+
+    def serialize(self):
+        dump = { 'name': self.name, 'raw': self.raw, }
+        return json.dumps(dump)
+
+    def save(self):
+        if not CACHE_ENABLED:
+            return None
+        with open(CACHE, 'w') as fd:
+            fd.write(self.serialize())
+
+    def lookup(self, task_info):
+        sets = [self.tasks] + self.task_sets
+        tasks = set()
+        for task_set in sets:
+            for task_subset in map(lambda s: s.lookup(task_info), sets):
+                for task in task_subset:
+                    tasks.add(task)
+        return list(filter(lambda task: task is not None, tasks))
+
+    def lookup_one(self, task_info):
+        tasks = self.lookup(task_info)
+        if len(tasks) == 1:
+            return tasks[0]
+        return None
+
+    @staticmethod
+    def load():
+        if not CACHE_ENABLED:
+            return None
+        if not os.path.exists(CACHE):
+            return None
+        with open(CACHE, 'r') as fd:
+            return ResultSet.deserialize(fd.read())
+
+    @staticmethod
+    def deserialize(dumped_str):
+        dump = json.loads(dumped_str)
+        return ResultSet(dump['raw'],
+                         name=dump['name'], no_save=True)

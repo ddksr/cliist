@@ -1,6 +1,9 @@
 API_TOKEN=''
 OUTPUT_DATE_FORMAT='%d.%m.%Y @ %H:%M:%S'
 
+CACHE_ENABLED = True
+CACHE = '/tmp/todoist.json'
+
 class colors:
     PROJECT = '\033[95m'
     FILTER = '\033[95m'
