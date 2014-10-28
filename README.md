@@ -115,7 +115,7 @@ today, tomorrow
   - 12345673 29.10.2014 @ 23:59:59   recurring task
 ```
 
-***Warning***: Search string can only be used if you used a listing command before and the task appeared in the list. In this example we used `cliist -q today`.
+***Warning***: Search string can only be used if you used a listing command before and the task appeared in the list. In this example we used `cliist -q 'today, tomorrow'` before.
 
 
 
