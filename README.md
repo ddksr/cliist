@@ -88,7 +88,7 @@ cliist -a -d 'ev day' recurring task
 cliist -a something for the future 
 ```
 
-List all tasks for today. Input: `cliist -q 'today, tomorrow'`
+List all tasks for today and tomorrow. Input: `cliist -q 'today, tomorrow'`
 
 Output:
 
