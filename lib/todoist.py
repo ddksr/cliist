@@ -62,10 +62,10 @@ def prepare_task_info(cinfo, due_date=None):
         args['date_string'] = due_date
     return labels, project, args
 
-def get_taks(cinfo):
+def get_taks(cinfo, task=None):
     cached = models.ResultSet.load()
     ids_recurring, ids_normal = [], []
-    for task_raw in cinfo['raw']:
+    for task_raw in [task] if task else cinfo['raw']:
         if task_raw.isdigit():
             task_id = int(task_raw)
             if cached:

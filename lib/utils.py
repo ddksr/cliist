@@ -1,0 +1,3 @@
+class CliistException(Exception):
+    pass
+
