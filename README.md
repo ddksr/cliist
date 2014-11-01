@@ -14,9 +14,9 @@ The client is currently tested only with Todoist Premium.
 
 Every listed resultset is cached to the OS. This is helpful when you want to mark tasks completed. 
 
-## Instalation
+## After installation
 Run installation script and type in your API token:
-`./install.sh`
+`cliist-install`
 
 ## Updating
 Please check if there are any new settings in `settings.py.template` and add them to your local settings. I will try to figure out a better way of updating the application in the future.
