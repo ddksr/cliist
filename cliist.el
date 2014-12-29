@@ -62,4 +62,8 @@
 												  ""
 												(concat "-p " project)))))
 
+(defun cliist/run (command)
+  (interactive "sCommand: ")
+  (shell-command (format cliist/exec command)))
+
 (provide 'cliist)
