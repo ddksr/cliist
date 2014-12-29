@@ -18,7 +18,7 @@ def main():
     parser.add_option('-d', '--date',
                       dest='date',
                       default=None,
-                      help='Todoist due date formatted in Todoist date format. Available when no other options specified and when adding or editing tasks.')
+                      help='Todoist due date formatted in Todoist date format. Available when no other options specified and when adding or editing tasks. If using with --archive, date can only be a full iso formatted date. Example: 2014-12-1T10:11')
     
     parser.add_option('-s', '--sort',
                       dest='order',
@@ -76,6 +76,16 @@ def main():
                       default=False,
                       help='List all uncompleted todoist tasks.')
 
+    parser.add_option('--archive',
+                      dest='archive',
+                      action='store_true',
+                      help='If -p PROJECT is specified, show only completed tasks of that project. Date (-d) will be set as from date but it has to be in ISO format.')
+
+    parser.add_option('--limit',
+                      dest='limit',
+                      default=30,
+                      help='Limit returned archive size.')
+    
     parser.add_option('--gte',
                       dest='gte_date',
                       default=None,
