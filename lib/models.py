@@ -35,8 +35,8 @@ class Task(dict):
         self.raw = task_raw
         self.date_string = task_raw.get('date_string', '')
         self.is_recurring = any([
-            'every ' in self.date_string,
-            'ev ' in self.date_string
+            'every ' in (self.date_string or ''),
+            'ev ' in (self.date_string or ''),
         ])
 
     def serialize(self):
