@@ -4,7 +4,7 @@ import json
 import re
 
 from settings import API_TOKEN
-from . import models
+from . import models, output
 from .utils import CliistException
 
 QUERY_DELIMITER = re.compile(', *')
@@ -94,13 +94,14 @@ def get_taks(cinfo, task=None):
     return ids_normal + ids_normal, ids_normal, ids_recurring
 
 
-def list_cache():
+def list_cache(output_engine=output.Plain):
     cached = models.ResultSet.load()
     if cached is None:
         raise CliistException('Cache is empty')
-    cached.pprint()
+    cached.pprint(output_engine=output_engine)
 
-def project_tasks(cinfo, project_name, stdout=True, **options):
+def project_tasks(cinfo, project_name, stdout=True,
+                  output_engine=output.Plain, **options):
     all_projects = list_projects(cinfo, stdout=False,
                                  do_search=False)
     project_id = None
@@ -113,16 +114,16 @@ def project_tasks(cinfo, project_name, stdout=True, **options):
     result = api_call('getUncompletedItems', project_id=project_id)
     result_set = models.ResultSet(result, project_name or 'view all', **options)
     if stdout:
-        result_set.pprint()
+        result_set.pprint(output_engine=output_engine)
     return result_set
     
-def query(info, query, stdout=True, **options):
+def query(info, query, stdout=True, output_engine=output.Plain, **options):
     queries = QUERY_DELIMITER.split(query)
     result = api_call('query', queries=ulist(queries))
     result_set = models.ResultSet(result, query or 'view all', **options)
 
     if stdout:
-        result_set.pprint()
+        result_set.pprint(output_engine=output_engine)
     return result_set
 
 def complete_tasks(cinfo):
@@ -176,11 +177,11 @@ def list_projects(cinfo, stdout=True, do_search=True, reverse=False):
             print(indent + '#' + name)
     return result
 
-def list_tasks(cinfo, due_date, stdout=True, **options):
+def list_tasks(cinfo, due_date, stdout=True, output_engine=output.Plain, **options):
     result = api_call('query', queries=ulist(['overdue','today']))
     if cinfo:
         options['search'] = cinfo.get('merged')
     result_set = models.ResultSet(result, name='Overdue and today', **options)
     if stdout:
-        result_set.pprint()
+        result_set.pprint(output_engine=output_engine)
     return result_set

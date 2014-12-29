@@ -2,6 +2,8 @@ from datetime import datetime
 import json
 import os.path
 
+from . import output
+
 from settings import colors, OUTPUT_DATE_FORMAT
 
 try:
@@ -11,7 +13,6 @@ except:
 
 
 class Task(dict):
-    FORMAT = '{c0}{indent}  -{taskid:>9} {c2}{due}{priority}{c1}{content}\n'
     def __init__(self, task_raw):
         for key, val in task_raw.items():
             self[key] = val
@@ -55,35 +56,11 @@ class Task(dict):
     def __hash__(self):
         return self.get('id')
         
-    def pprint(self):
-        indent = '  ' * (int(self.get('indent', '1')) - 1)
-        priority = '  '
-        if self.priority and self.priority != 1:
-            priority = '{}{}{} '.format(colors.PRIORITY,
-                                        (5 - self.priority),
-                                        colors.ENDC)
-        due = self.get_date()
-        if due:
-            due += ' '
-        print(Task.FORMAT.format(c0=colors.ENDC,
-                                 c1=colors.CONTENT,
-                                 c2=colors.DATE,
-                                 indent=indent,
-                                 priority=priority,
-                                 content=self.get('content'),
-                                 due=due,
-                                 taskid=self.get('id')), end='')
+    def pprint(self, output_engine=output.Plain):
+        output_engine.task(self)
+        
 
 class TaskSet(list):
-    COLORS = {
-        'project': colors.PROJECT,
-        'unknown': colors.ENDC,
-        'set': colors.ENDC
-    }
-    FORMAT = {
-        'project': '{color} #{project_name}\n',
-        'unknown': '',
-    }
     FILTERS = {
         'gte': lambda val: (lambda item: item.sort_date.date() >= val),
         'lte': lambda val: (lambda item: item.sort_date.date() <= val),
@@ -128,12 +105,8 @@ class TaskSet(list):
             selected.append(item)
         return selected
         
-    def pprint(self):
-        color = TaskSet.COLORS[self.set_type]
-        print(TaskSet.FORMAT[self.set_type].format(color=color,
-                                                   **self.raw), end='')
-        for task in self:
-            task.pprint()
+    def pprint(self, output_engine=output.Plain):
+        output.Plain.task_set(self)
 
     def lookup(self, task_info):
         results = set()
@@ -168,15 +141,8 @@ class ResultSet:
         if not no_save:
             self.save()
 
-    def pprint(self):
-        if self.name:
-            print('{}{}\n{}{}'.format(colors.FILTER, self.name,
-                                      ''.join('=' for _ in self.name or ''),
-                                    colors.ENDC))
-        for task_set in self.task_sets:
-            task_set.pprint()
-        if self.tasks:
-            self.tasks.pprint()
+    def pprint(self, output_engine=output.Plain):
+        output_engine.result_set(self)
 
     def select(self, **options):
         return ResultSet(self.raw, name=self.name, **options)

@@ -160,5 +160,8 @@ Options:
   --lt=LT_DATE          List tasks with due date less than LT_DATE
   --eqaul=EQ_DATE       List tasks with due date equal to EQ_DATE
   --not-equal=NEQ_DATE  List tasks with due date not equal to NEQ_DATE
+  --cached              List cached resultset.
+  --format=FORMAT       Select output format (default plain). Formats: plain,
+                        org
 ```
 

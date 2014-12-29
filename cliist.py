@@ -4,6 +4,7 @@ from optparse import OptionParser
 
 from lib import process
 from lib.utils import CliistException
+from lib import output
 
 USAGE = "usage: %prog [options] task_content|search_string|task_id"
 DESC = """Simple Todoist console client.
@@ -111,6 +112,12 @@ def main():
                       default=False,
                       help='List cached resultset.')
 
+    parser.add_option('--format',
+                      dest='format',
+                      default='plain',
+                      help='Select output format (default plain). Formats: '
+                      + ', '.join(output.formaters.keys()))
+    
     options, args = parser.parse_args()
     try:
         process.command(args, options)

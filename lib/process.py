@@ -1,6 +1,6 @@
 from datetime import date
 import re
-from lib import todoist
+from lib import todoist, output
 
 EU_DATE = re.compile('\d{1,2}\.\d{1,2}\.\d{2}(\d{2})?')
 ORDER_OPTIONS = {
@@ -80,7 +80,7 @@ def get_filters(options):
     
 def command(args, options):
     cinfo = args and content_info(args) or {}
-    
+    formater = output.formaters[options.format]
     list_opts = {
         'filters': get_filters(options),
         'reverse': options.reverse,
@@ -89,9 +89,9 @@ def command(args, options):
     }
     due_date = options.date and todoist_date(options.date) or None
     if options.query:
-        todoist.query(cinfo, options.query, **list_opts)
+        todoist.query(cinfo, options.query, output_engine=formater, **list_opts)
     elif options.all:
-        todoist.query(cinfo, 'view all', **list_opts)
+        todoist.query(cinfo, 'view all', output_engine=formater, **list_opts)
     elif options.complete:
         todoist.complete_tasks(cinfo)
     elif options.add_task:
@@ -103,9 +103,10 @@ def command(args, options):
     elif options.edit_id:
         todoist.edit_task(cinfo, options.edit_id, due_date)
     elif options.project_name:
-        todoist.project_tasks(cinfo, options.project_name, **list_opts)
+        todoist.project_tasks(cinfo, options.project_name,
+                              output_engine=formater, **list_opts)
     elif options.cached:
-        todoist.list_cache()
+        todoist.list_cache(output_engine=formater)
     else:
-        todoist.list_tasks(cinfo, due_date, **list_opts)
+        todoist.list_tasks(cinfo, due_date, output_engine=formater, **list_opts)
         
