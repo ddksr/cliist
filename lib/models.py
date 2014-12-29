@@ -106,7 +106,7 @@ class TaskSet(list):
         return selected
         
     def pprint(self, output_engine=output.Plain):
-        output.Plain.task_set(self)
+        output_engine.task_set(self)
 
     def lookup(self, task_info):
         results = set()

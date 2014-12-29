@@ -121,7 +121,6 @@ def query(info, query, stdout=True, output_engine=output.Plain, **options):
     queries = QUERY_DELIMITER.split(query)
     result = api_call('query', queries=ulist(queries))
     result_set = models.ResultSet(result, query or 'view all', **options)
-
     if stdout:
         result_set.pprint(output_engine=output_engine)
     return result_set

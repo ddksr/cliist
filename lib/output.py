@@ -98,7 +98,7 @@ class Org:
         if name:
             print('{} {}'.format('*' * level, name))
         for task in obj:
-            Org.task(obj, level=(level+1) if name else level)
+            Org.task(task, level=(level+1) if name else level)
 
     @staticmethod
     def result_set(obj):
