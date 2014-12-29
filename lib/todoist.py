@@ -116,6 +116,25 @@ def project_tasks(cinfo, project_name, stdout=True,
     if stdout:
         result_set.pprint(output_engine=output_engine)
     return result_set
+
+def archive(cinfo, limit, date=None, project_name=None, stdout=True, 
+            output_engine=output.Plain, **options):
+    result = None
+    all_projects = list_projects(cinfo, stdout=False, do_search=False)
+    kwargs = {'limit': limit}
+    if date:
+        kwargs['from_date'] = date
+    for proj in all_projects:
+        if project_name == proj['name']:
+            kwargs['project_id'] = proj.get('id')
+            break
+    result = api_call('getAllCompletedItems', **kwargs)['items']
+    result_set = models.ResultSet(result,
+                                  'Completed: ' + (project_name or 'all'),
+                                  **options)
+    if stdout:
+        result_set.pprint(output_engine=output_engine)
+    return result_set
     
 def query(info, query, stdout=True, output_engine=output.Plain, **options):
     queries = QUERY_DELIMITER.split(query)

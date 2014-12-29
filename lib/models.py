@@ -38,6 +38,8 @@ class Task(dict):
             'every ' in (self.date_string or ''),
             'ev ' in (self.date_string or ''),
         ])
+        self.in_history = bool(task_raw.get('in_history', 0))
+        self.checked = bool(task_raw.get('completed_date', None))
 
     def serialize(self):
         return json.dumps(self)

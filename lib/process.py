@@ -92,6 +92,9 @@ def command(args, options):
         todoist.query(cinfo, options.query, output_engine=formater, **list_opts)
     elif options.all:
         todoist.query(cinfo, 'view all', output_engine=formater, **list_opts)
+    elif options.archive:
+        todoist.archive(cinfo, options.limit, options.date, options.project_name,
+                        output_engine=formater, **list_opts)
     elif options.complete:
         todoist.complete_tasks(cinfo)
     elif options.add_task:

@@ -79,9 +79,10 @@ class Org:
         if obj.date_string:
             props['DateString'] = obj.date_string
 
-        print('{} TODO {}{}'.format(stars,
-                                    '[#{}] '.format(priority) if priority else '',
-                                    obj.content))
+        print('{} {} {}{}'.format(stars,
+                                  'DONE' if obj.checked else 'TODO',
+                                  '[#{}] '.format(priority) if priority else '',
+                                  obj.content))
         if due:
             print(indent + due)
         print(indent + ':PROPERTIES:')
