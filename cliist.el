@@ -14,15 +14,22 @@
      
 ;;;###autoload
 
-(setq cliist/query-exe "cliist %s --format org")
+(setq cliist/list-exec "cliist %s --format org"
+	  cliist/exec "cliist %s")
 
 (defun cliist/open-buffer-and-run-command (title cliist-command)
   (switch-to-buffer (get-buffer-create (format "*Cliist: %s*" title)))
   (erase-buffer)
   (org-mode)
-  (insert (shell-command-to-string (format cliist/query-exe cliist-command)))
+  (insert (shell-command-to-string (format cliist/list-exec cliist-command)))
   (goto-line 0) (move-to-column 0)
   (org-cycle) (org-cycle))
+
+(defun cliist/project-list ()
+  (mapcar '(lambda (x)
+			 (nth 1 (split-string x "#")))
+		  (split-string
+		   (shell-command-to-string (format cliist/list-exec "-P")) "\n")))
 
 (defun cliist/today-and-overdue ()
   (interactive)
@@ -33,12 +40,26 @@
   (cliist/open-buffer-and-run-command query (format "-q %s" query)))
   
 (defun cliist/project (name)
-  (interactive "sProject name: \n")
+  (interactive
+   (list
+	(completing-read "Project: " (cliist/project-list))))
   (cliist/open-buffer-and-run-command (format "#%s" name) (format "-p %s" name)))
 
 (defun cliist/view-all ()
   (interactive)
   (cliist/open-buffer-and-run-command "All" "-A"))
 
+(defun cliist/completed (number &optional project)
+  (interactive
+   (list
+	(read-from-minibuffer "Number of items: " "30")
+	(completing-read "Project (leave empty for all): "
+					 (cliist/project-list))))
+  (cliist/open-buffer-and-run-command "Completed"
+									  (format "--archive --limit %s %s"
+											  number
+											  (if (= (length project) 0)
+												  ""
+												(concat "-p " project)))))
 
 (provide 'cliist)
