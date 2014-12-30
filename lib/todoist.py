@@ -173,14 +173,19 @@ def edit_task(cinfo, edit_id, due_date=None):
     api_call('updateItem', **api_args)
     
 
-def list_labels(cinfo, stdout=True, do_search=True, reverse=False):
+def list_labels(cinfo, stdout=True, info=False,
+                do_search=True, reverse=False):
     result = api_call('getLabels')
     search = do_search and cinfo.get('merged')
-    for label in reverse and result[::-1] or result:
+    for label_name in reverse and result.keys()[::-1] or result.keys():
+        label = result[label_name]
         if search and search.lower() not in label.lower():
             continue
         if stdout:
-            print('@' + label)
+            out_str = '@' + label_name
+            if info:
+                out_str += ' ' + str(label['id'])
+            print(out_str)
     return result
     
 def list_projects(cinfo, stdout=True, do_search=True, reverse=False):

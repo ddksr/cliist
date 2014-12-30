@@ -59,6 +59,12 @@ def main():
                       default=False,
                       help='List Todoist labels.')
 
+    parser.add_option('--info',
+                      dest='info',
+                      action='store_true',
+                      default=False,
+                      help='Add aditional info .')
+
     parser.add_option('-P', '--projects',
                       dest='projects',
                       action='store_true',

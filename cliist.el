@@ -20,6 +20,8 @@
 (setq cliist/list-exec "cliist %s --format org"
 	  cliist/exec "cliist %s")
 
+;;; ---------- Functions: Helper functions
+
 (defun cliist/open-buffer-and-run-command (title cliist-command)
   (switch-to-buffer (get-buffer-create (format "*Cliist: %s*" title)))
   (erase-buffer)
@@ -36,40 +38,18 @@
 		  (split-string
 		   (shell-command-to-string (format cliist/list-exec "-P")) "\n")))
 
-(defun cliist/today-and-overdue ()
-  (interactive)
-  (cliist/open-buffer-and-run-command "today and overdue" ""))
+(defun cliist/label-list ()
+  (split-string
+   (shell-command-to-string (format cliist/list-exec "-L")) "\n"))
 
-(defun cliist/query (query)
-  (interactive "sQuery: \n")
-  (cliist/open-buffer-and-run-command query (format "-q %s" query)))
-  
-(defun cliist/project (name)
-  (interactive
-   (list
-	(completing-read "Project: " (cliist/project-list))))
-  (cliist/open-buffer-and-run-command (format "#%s" name) (format "-p %s" name)))
-
-(defun cliist/view-all ()
-  (interactive)
-  (cliist/open-buffer-and-run-command "All" "-A"))
-
-(defun cliist/completed (number &optional project)
-  (interactive
-   (list
-	(read-from-minibuffer "Number of items: " "30")
-	(completing-read "Project (leave empty for all): "
-					 (cliist/project-list))))
-  (cliist/open-buffer-and-run-command "Completed"
-									  (format "--archive --limit %s %s"
-											  number
-											  (if (= (length project) 0)
-												  ""
-												(concat "-p " project)))))
-
-(defun cliist/run (command)
-  (interactive "sCommand: ")
-  (shell-command (format cliist/exec command)))
+(defun cliist/label-hash ()
+  (-let ((table (make-hash-table)))
+	(-each (-map (lambda (str) (reverse (split-string str " ")))
+				 (split-string (shell-command-to-string
+								(format cliist/list-exec "-L --info"))
+							   "\n"))
+	       (lambda (pair) (puthash (car pair) (nth 1 pair) table)))
+	table))
 
 
 (defun cliist/empty (val)
@@ -114,7 +94,52 @@
 						  "")
 						c-content))))
 
+;;; ---------- Functions: public api
+
+(defun cliist/today-and-overdue ()
+  "List today's and overdue tasks"
+  (interactive)
+  (cliist/open-buffer-and-run-command "today and overdue" ""))
+
+(defun cliist/query (query)
+  "List tasks specified by query"
+  (interactive "sQuery: \n")
+  (cliist/open-buffer-and-run-command query (format "-q %s" query)))
+  
+(defun cliist/project (name)
+  "List project tasks"
+  (interactive
+   (list
+	(completing-read "Project: " (cliist/project-list))))
+  (cliist/open-buffer-and-run-command (format "#%s" name) (format "-p %s" name)))
+
+(defun cliist/view-all ()
+  "List all uncompleted tasks, organize by project"
+  (interactive)
+  (cliist/open-buffer-and-run-command "All" "-A"))
+
+(defun cliist/completed (&optional number project)
+  "List completed tasks. Specify NUMBER and PROJECT"
+  (interactive
+   (list
+	(read-from-minibuffer "Number of items: " "30")
+	(completing-read "Project (leave empty for all): "
+					 (cliist/project-list))))
+  (cliist/open-buffer-and-run-command "Completed"
+									  (format "--archive --limit %s %s"
+											  number
+											  (if (= (length project) 0)
+												  ""
+												(concat "-p " project)))))
+
+(defun cliist/run (command)
+  "Run cliist command"
+  (interactive "sCommand: ")
+  (shell-command (format cliist/exec command)))
+
+
 (defun cliist/add-task (&optional content date tag)
+  "Add task to Todoist"
   (interactive)
   (apply 'cliist/add-task-cont
 		 (--zip-with (-first 'cliist/not-empty

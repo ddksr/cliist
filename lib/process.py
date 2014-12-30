@@ -100,7 +100,7 @@ def command(args, options):
     elif options.add_task:
         todoist.add_task(cinfo, due_date)
     elif options.labels:
-        todoist.list_labels(cinfo, reverse=options.reverse)
+        todoist.list_labels(cinfo, info=options.info, reverse=options.reverse)
     elif options.projects:
         todoist.list_projects(cinfo, reverse=options.reverse)
     elif options.edit_id:
