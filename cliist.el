@@ -24,13 +24,15 @@
   (switch-to-buffer (get-buffer-create (format "*Cliist: %s*" title)))
   (erase-buffer)
   (org-mode)
-  (insert (shell-command-to-string (format cliist/list-exec qcliist-command)))
-  (goto-line 0) (move-to-column 0)
+  (insert (shell-command-to-string (format cliist/list-exec cliist-command)))
+  (let ((current-prefix-arg 0))
+    (call-interactively 'goto-line)) ; insetead of using goto-line directly
+  (move-to-column 0)
   (org-cycle) (org-cycle))
 
 (defun cliist/project-list ()
-  (mapcar '(lambda (x)
-			 (nth 1 (split-string x "#")))
+  (mapcar #'(lambda (x)
+			  (nth 1 (split-string x "#")))
 		  (split-string
 		   (shell-command-to-string (format cliist/list-exec "-P")) "\n")))
 
@@ -101,17 +103,16 @@
 		  nil)))
 
 (defun cliist/add-task-cont (content &optional date tag)
-  (message "%s | %s | %s" date content tag)
   (let ((c-date (read-from-minibuffer "Date: " (or date "")))
 		(c-content (read-from-minibuffer "Content: "
 										 (if (cliist/not-empty tag)
 											 (format "#%s %s" tag content)
 										   (or content "")))))
-	(message "%s -a %s"
-			 (if (cliist/not-empty c-date)
-				 (format "-d %s" c-date)
-			   "")
-			 c-content)))
+	(cliist/run (format "-a%s \"%s\""
+						(if (cliist/not-empty c-date)
+							(format " -d \"%s\"" c-date)
+						  "")
+						c-content))))
 
 (defun cliist/add-task (&optional content date tag)
   (interactive)
@@ -126,13 +127,13 @@
   :lighter " cliist"
   :global t
   :keymap (let ((map (make-sparse-keymap)))
-            (define-key map (kbd "C-c c r") 'cliist/run)
-			(define-key map (kbd "C-c c t") 'cliist/today-and-overdue)
-			(define-key map (kbd "C-c c c") 'cliist/completed)
-			(define-key map (kbd "C-c c p") 'cliist/project)
-			(define-key map (kbd "C-c c q") 'cliist/query)
-			(define-key map (kbd "C-c c v") 'cliist/view-all)
-			(define-key map (kbd "C-c c a") 'cliist/add-task)
+            (define-key map (kbd "C-c t r") 'cliist/run)
+			(define-key map (kbd "C-c t t") 'cliist/today-and-overdue)
+			(define-key map (kbd "C-c t c") 'cliist/completed)
+			(define-key map (kbd "C-c t p") 'cliist/project)
+			(define-key map (kbd "C-c t q") 'cliist/query)
+			(define-key map (kbd "C-c t v") 'cliist/view-all)
+			(define-key map (kbd "C-c t a") 'cliist/add-task)
             map))
 
 (provide 'cliist)
