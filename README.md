@@ -65,6 +65,8 @@ Output:
 ### Add a task for project Proj 1 with due date today and label @happy and of first priority
 Input: `./cliist.py -a a very important task @happy #Proj1 %%4` (cliist uses %%4 instead of !!4 because ! is a special character in bash).
 
+Alternetively, you could also input: `./cliist.py -a 'a very important task @happy' --project Proj1 --priority 4`
+
 ### Query 
 Input: `./cliist.py -q @happy`
 
@@ -161,6 +163,10 @@ Options:
   --eqaul=EQ_DATE       List tasks with due date equal to EQ_DATE
   --not-equal=NEQ_DATE  List tasks with due date not equal to NEQ_DATE
   --cached              List cached resultset.
+  -o TASK_PROJECT, --project=TASK_PROJECT
+                        New task project (available only when adding a task).
+  -i TASK_PRIORITY, --priority=TASK_PRIORITY
+                        New task priority (available only when adding a task).  
   --format=FORMAT       Select output format (default plain). Formats: plain,
                         org
 ```
