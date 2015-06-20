@@ -32,7 +32,7 @@ def todoist_date(date_str):
         return date_str.replace('.', '/')
     return date_str
     
-def content_info(content_raw):
+def content_info(content_raw, options):
     content = []
     mapper = lambda w: w.replace('%%', '!!').split(' ')
     for words in map(mapper, content_raw):
@@ -58,8 +58,8 @@ def content_info(content_raw):
         'merged': ' '.join(content),
         'raw': content_raw,
         'labels': raw_labels,
-        'project': project,
-        'priority': priority,
+        'project': project or options.task_project,
+        'priority': priority or options.task_priority,
     }
 
 def get_filters(options):
@@ -79,7 +79,7 @@ def get_filters(options):
     return filters
     
 def command(args, options):
-    cinfo = args and content_info(args) or {}
+    cinfo = args and content_info(args, options) or {}
     formater = output.formaters[options.format]
     list_opts = {
         'filters': get_filters(options),

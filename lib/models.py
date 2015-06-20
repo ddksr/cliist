@@ -11,7 +11,6 @@ try:
 except:
     CACHE_ENABLED, CACHE = False, ''
 
-
 class Task(dict):
     def __init__(self, task_raw):
         for key, val in task_raw.items():

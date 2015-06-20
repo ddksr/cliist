@@ -63,7 +63,7 @@ def main():
                       dest='info',
                       action='store_true',
                       default=False,
-                      help='Add aditional info .')
+                      help='Add aditional info.')
 
     parser.add_option('-P', '--projects',
                       dest='projects',
@@ -95,32 +95,32 @@ def main():
     parser.add_option('--gte',
                       dest='gte_date',
                       default=None,
-                      help='List tasks with due date greater or equal than GTE_DATE')
+                      help='List tasks with due date greater or equal than GTE_DATE.')
 
     parser.add_option('--lte',
                       dest='lte_date',
                       default=None,
-                      help='List tasks with due date less or equal to LTE_DATE')
+                      help='List tasks with due date less or equal to LTE_DATE.')
 
     parser.add_option('--gt',
                       dest='gt_date',
                       default=None,
-                      help='List tasks with due date greater than GT_DATE')
+                      help='List tasks with due date greater than GT_DATE.')
 
     parser.add_option('--lt',
                       dest='lt_date',
                       default=None,
-                      help='List tasks with due date less than LT_DATE')
+                      help='List tasks with due date less than LT_DATE.')
 
     parser.add_option('--eqaul',
                       dest='eq_date',
                       default=None,
-                      help='List tasks with due date equal to EQ_DATE')
+                      help='List tasks with due date equal to EQ_DATE.')
 
     parser.add_option('--not-equal',
                       dest='neq_date',
                       default=None,
-                      help='List tasks with due date not equal to NEQ_DATE')
+                      help='List tasks with due date not equal to NEQ_DATE.')
 
     parser.add_option('--cached',
                       dest='cached',
@@ -128,11 +128,23 @@ def main():
                       default=False,
                       help='List cached resultset.')
 
+    parser.add_option('-o', '--project',
+                      dest='task_project',
+                      default=None,
+                      help='New task project (available only when adding a task).')
+
+    parser.add_option('-i', '--priority',
+                      dest='task_priority',
+                      default=False,
+                      help='New task priority (available only when adding a task).')
+
     parser.add_option('--format',
                       dest='format',
                       default='plain',
                       help='Select output format (default plain). Formats: '
-                      + ', '.join(output.formaters.keys()))
+                      + ', '.join(output.formaters.keys()) + '.')
+
+    
     
     options, args = parser.parse_args()
     try:
