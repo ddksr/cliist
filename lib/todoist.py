@@ -43,7 +43,7 @@ def prepare_task_info(cinfo, due_date=None):
             labels.append(all_labels[label])
     if cinfo.get('project'):
         all_projects = list_projects(cinfo, stdout=False,
-                                do_search=False)
+                                     do_search=False)
         for proj in all_projects:
             if cinfo.get('project') == proj['name']:
                 project = proj
@@ -165,8 +165,6 @@ def add_task(cinfo, due_date=None):
 def edit_task(cinfo, edit_id, due_date=None):
     if not cinfo:
         raise CliistException('No task content')
-    if not due_date:
-        raise CliistException('No due date')
     # TODO: could use lookup
     labels, project, api_args = prepare_task_info(cinfo, due_date)
     api_args['id'] = edit_id
