@@ -5,6 +5,16 @@ if [[ -f settings.py ]]; then
 	exit 0
 fi;
 
+if [ "$(uname)" == "Darwin" ]; then
+	which python3 || which brew || echo "cliist requires homebrew to be installed to fetch its dependecies.";
+    which python3 || (which brew && brew install python3);
+elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+	which python3 || echo "Installer needs to sudo to install python3";
+    which python3 || sudo apt-get install python3 -y;
+elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
+    echo "Error: you\'re on Windows.";
+fi
+
 echo -n "Specify your API token: "
 read token
 sed "s/API_TOKEN=''/API_TOKEN='$token'/g" settings.py.template > settings.py
