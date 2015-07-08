@@ -1,0 +1,29 @@
+{
+  "name": "cliist",
+  "version": "1.0.0",
+  "description": "Todoist commandline client",
+  "main": "cliist.py",
+  "scripts": {
+    "test": "echo \"no tests defined\"; exit 1;",
+    "postinstall": "./cliist-install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ddksr/cliist.git"
+  },
+  "bin": {
+    "cliist": "cliist.py"
+  },
+  "keywords": [
+    "todoist",
+    "task",
+    "todo",
+    "project-management",
+    "cli"
+  ],
+  "author": "Shamasis Bhattacharya <mail@shamasis.net> (=)",
+  "bugs": {
+    "url": "https://github.com/ddksr/cliist/issues"
+  },
+  "homepage": "https://github.com/ddksr/cliist#readme"
+}
