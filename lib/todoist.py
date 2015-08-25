@@ -28,9 +28,8 @@ def api_call(method, **options):
         req = urllib.request.urlopen(url)
         content = req.read().decode('utf-8')
         return json.loads(content)
-        
-    except Exception as ex:
-        print(ex)
+    except Exception:
+        raise CliistException('Error connecting to Todoist API')
 
 def prepare_task_info(cinfo, due_date=None):
     labels, project = [], None
@@ -146,7 +145,6 @@ def query(info, query, stdout=True, output_engine=output.Plain, **options):
 
 def complete_tasks(cinfo):
     ids, ids_normal, ids_recurring = get_taks(cinfo)
-
     if ids_normal:
         api_call('completeItems', ids=ids_normal)
     if ids_recurring:
