@@ -1,36 +1,16 @@
-import urllib.parse
-import urllib.request
 import json
 import re
 
-from settings import API_TOKEN
 from . import models, output
 from .utils import CliistException
+from .api import api_call
 
 QUERY_DELIMITER = re.compile(', *')
-API_URL = 'https://api.todoist.com/API'
 TASK_FORMAT = '{c0}{indent} - {taskid:10} {priority}{c1}{content} {c2}{due}'
 
 def ulist(l):
     return json.dumps(l).replace(', ', ',')
 
-
-def api_call(method, **options):
-    options['token'] = API_TOKEN
-    query_string = urllib.parse.urlencode(options,
-                                          safe='',
-                                          errors=None,
-                                          encoding=None)
-    url = "{apiurl}/{method}?{query}".format(apiurl=API_URL,
-                                             method=method,
-                                             query=query_string)
-    try:
-        req = urllib.request.urlopen(url)
-        content = req.read().decode('utf-8')
-        return json.loads(content)
-        
-    except Exception as ex:
-        print(ex)
 
 def prepare_task_info(cinfo, due_date=None):
     labels, project = [], None
@@ -198,6 +178,7 @@ def list_projects(cinfo, stdout=True, do_search=True, reverse=False):
             print(indent + '#' + name)
     return result
 
+
 def list_tasks(cinfo, due_date, stdout=True, output_engine=output.Plain, **options):
     result = api_call('query', queries=ulist(['overdue','today']))
     if cinfo:
@@ -206,3 +187,6 @@ def list_tasks(cinfo, due_date, stdout=True, output_engine=output.Plain, **optio
     if stdout:
         result_set.pprint(output_engine=output_engine)
     return result_set
+
+
+

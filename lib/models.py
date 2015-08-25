@@ -2,7 +2,7 @@ from datetime import datetime
 import json
 import os.path
 
-from . import output
+from . import output, api
 
 from settings import colors, OUTPUT_DATE_FORMAT
 
@@ -27,9 +27,11 @@ class Task(dict):
                                                   '%a %d %b %Y %H:%M:%S')
         self.sort_date = (self.due_date or datetime(1500, 1, 1)).replace(tzinfo=None)
         
-        self.project = task_raw.get('project')
+        self.project = task_raw.get('project_id')
         self.priority = int(task_raw.get('priority', '1'))
         self.labels = task_raw.get('labels', [])
+        self['project_name'] = projects_dict.get(self.project, '')
+        self['label_names']  = ' '.join(map( lambda x: labels_dict.get(x), self.labels ))
         self.content = task_raw.get('content', '')
         self.raw = task_raw
         self.date_string = task_raw.get('date_string', '')
@@ -187,3 +189,23 @@ class ResultSet:
         dump = json.loads(dumped_str)
         return ResultSet(dump['raw'],
                          name=dump['name'], no_save=True)
+
+
+class LabelDict(dict):
+
+    def __init__(self):
+        for name, details in api.api_call('getLabels').items():
+            self[details['id']] = '@' + details['name']
+
+class ProjectDict(dict):
+
+    def __init__(self):
+        for project in api.api_call('getProjects'):
+            self[project['id']] = '#' + project['name']
+
+projects_dict = ProjectDict()
+labels_dict = LabelDict()
+
+
+
+

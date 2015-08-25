@@ -9,7 +9,7 @@ class Plain:
         'set': colors.ENDC
     }
     FORMAT = {
-        'task': '{c0}{indent}  -{taskid:>9} {c2}{due}{priority}{c1}{content}{c0}\n',
+        'task': '{c0}{indent}  -{taskid:>9} {c2}{due}{priority}{c1}{content}{c0} {c3}{project_name}{c4} {label_names}\n',
         'project': '{color} #{project_name}\n',
         'unknown': '',
     }
@@ -28,9 +28,13 @@ class Plain:
         print(Plain.FORMAT['task'].format(c0=colors.ENDC,
                                           c1=colors.CONTENT,
                                           c2=colors.DATE,
+                                          c3=colors.PROJECT,
+                                          c4=colors.LABEL,
                                           indent=indent,
                                           priority=priority,
                                           content=obj.get('content'),
+                                          project_name=obj.get('project_name'),
+                                          label_names=obj.get('label_names'),
                                           due=due,
                                           taskid=obj.get('id')), end='')
 
