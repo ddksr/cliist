@@ -1,10 +1,10 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import os.path
 
 from . import output, api
 
-from settings import colors, OUTPUT_DATE_FORMAT
+from settings import colors, OUTPUT_DATE_FORMAT, TIME_OFFSET
 
 try:
     from settings import CACHE_ENABLED, CACHE
@@ -47,6 +47,8 @@ class Task(dict):
 
     def get_date(self):
         if self.due_date:
+            if TIME_OFFSET:
+                return (self.due_date + timedelta(hours=TIME_OFFSET)).strftime(OUTPUT_DATE_FORMAT)
             return self.due_date.strftime(OUTPUT_DATE_FORMAT)
         return ''
 

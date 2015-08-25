@@ -1,6 +1,6 @@
 import datetime
 
-from settings import colors, OUTPUT_DATE_FORMAT
+from settings import colors
 
 class Plain:
     COLORS = {
@@ -9,8 +9,8 @@ class Plain:
         'set': colors.ENDC
     }
     FORMAT = {
-        'task': '{c0}{indent}{priority}{c1}{content:35.35}{c0}\n        {c3}{project_name:26.26}{c4} {label_names:26.26} {c2}Due: {due:12.12}\n{c0}',
-        'project': '\n{color} #{project_name}\n================================================================================\n',
+        'task': '{c0}{indent}{c5}{priority:>3.3} {c1}{content}{c0}\n        {c3}{project_name:26.26}{c4} {label_names:26.26} {c2}Due: {due:12.12}\n{c0}',
+        'project': '\n{color}#{project_name}\n',
         'unknown': '',
     }
     
@@ -19,9 +19,7 @@ class Plain:
         indent = '  ' * (int(obj.get('indent', '1')) - 1)
         priority = '  '
         if obj.priority and obj.priority != 1:
-            priority = '{}{}{} '.format(colors.PRIORITY,
-                                        (5 - obj.priority),
-                                        colors.ENDC)
+            priority = '!' * (obj.priority - 1)
         due = obj.get_date()
         if due:
             due += ' '
@@ -30,7 +28,8 @@ class Plain:
                                           c2=colors.DATE,
                                           c3=colors.PROJECT,
                                           c4=colors.LABEL,
-                                          indent=indent,
+                                          c5=colors.PRIORITY,
+					  indent=indent,
                                           priority=priority,
                                           content=obj.get('content'),
                                           project_name=obj.get('project_name'),

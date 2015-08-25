@@ -1,5 +1,6 @@
 API_TOKEN=''
 OUTPUT_DATE_FORMAT='%d.%m.%Y @ %H:%M:%S'
+TIME_OFFSET=0
 
 CACHE_ENABLED = True
 CACHE = '/tmp/todoist.json'
