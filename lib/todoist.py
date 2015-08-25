@@ -179,10 +179,10 @@ def list_projects(cinfo, stdout=True, do_search=True, reverse=False):
     return result
 
 def list_tasks(cinfo, due_date, stdout=True, output_engine=output.Plain, **options):
-    result = api_call('query', queries=ulist(['overdue','today']))
+    result = api_call('query', queries=ulist(['overdue','today','tomorrow']))
     if cinfo:
         options['search'] = cinfo.get('merged')
-    result_set = models.ResultSet(result, name='Overdue and today', **options)
+    result_set = models.ResultSet(result, name='Overdue, today and tomorrow', **options)
     if stdout:
         result_set.pprint(output_engine=output_engine)
     return result_set
