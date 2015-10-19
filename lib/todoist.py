@@ -41,7 +41,7 @@ def prepare_task_info(cinfo, due_date=None):
         args['date_string'] = due_date
     return labels, project, args
 
-def get_taks(cinfo, task=None):
+def get_task(cinfo, task=None):
     cached = models.ResultSet.load()
     ids_recurring, ids_normal = [], []
     for task_raw in [task] if task else cinfo['raw']:
@@ -124,7 +124,7 @@ def query(info, query, stdout=True, output_engine=output.Plain, **options):
     return result_set
 
 def complete_tasks(cinfo):
-    ids, ids_normal, ids_recurring = get_taks(cinfo)
+    ids, ids_normal, ids_recurring = get_task(cinfo)
     if ids_normal:
         api_call('completeItems', ids=ids_normal)
     if ids_recurring:
