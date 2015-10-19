@@ -2,6 +2,8 @@ import urllib.parse
 import urllib.request
 import json
 
+from .utils import CliistException
+
 from settings import API_TOKEN
 
 API_URL = 'https://api.todoist.com/API'
@@ -19,7 +21,7 @@ def api_call(method, **options):
         req = urllib.request.urlopen(url)
         content = req.read().decode('utf-8')
         return json.loads(content)
+    except Exception:
+        raise CliistException('Error connecting to Todoist API')
 
-    except Exception as ex:
-        print(ex)
 

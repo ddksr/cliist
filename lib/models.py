@@ -1,15 +1,8 @@
 from datetime import datetime, timedelta
-import json
-import os.path
 
-from . import output, api
+from . import output, cache, api
 
-from settings import colors, OUTPUT_DATE_FORMAT, TIME_OFFSET
-
-try:
-    from settings import CACHE_ENABLED, CACHE
-except:
-    CACHE_ENABLED, CACHE = False, ''
+from settings import OUTPUT_DATE_FORMAT, TIME_OFFSET
 
 class Task(dict):
     def __init__(self, task_raw):
@@ -41,9 +34,6 @@ class Task(dict):
         ])
         self.in_history = bool(task_raw.get('in_history', 0))
         self.checked = bool(task_raw.get('completed_date', None))
-
-    def serialize(self):
-        return json.dumps(self)
 
     def get_date(self):
         if self.due_date:
@@ -84,9 +74,6 @@ class TaskSet(list):
         for task in result.get('uncompleted', []):
             self.append(Task(task))
         self.raw = result
-
-    def serialize(self):
-        return json.dumps(self)
 
     def copy(self):
         copied = TaskSet(set_type=self.set_type)
@@ -152,15 +139,11 @@ class ResultSet:
     def select(self, **options):
         return ResultSet(self.raw, name=self.name, **options)
 
-    def serialize(self):
-        dump = { 'name': self.name, 'raw': self.raw, }
-        return json.dumps(dump)
+    def dump(self):
+        return { 'name': self.name, 'raw': self.raw, }
 
     def save(self):
-        if not CACHE_ENABLED:
-            return None
-        with open(CACHE, 'w') as fd:
-            fd.write(self.serialize())
+        cache.set('resultset', self.dump())
 
     def lookup(self, task_info):
         sets = [self.tasks] + self.task_sets
@@ -179,18 +162,10 @@ class ResultSet:
 
     @staticmethod
     def load():
-        if not CACHE_ENABLED:
+        dump = cache.get('resultset')
+        if not dump:
             return None
-        if not os.path.exists(CACHE):
-            return None
-        with open(CACHE, 'r') as fd:
-            return ResultSet.deserialize(fd.read())
-
-    @staticmethod
-    def deserialize(dumped_str):
-        dump = json.loads(dumped_str)
-        return ResultSet(dump['raw'],
-                         name=dump['name'], no_save=True)
+        return ResultSet(dump['raw'], name=dump['name'], no_save=True)
 
 
 class LabelDict(dict):
@@ -207,7 +182,3 @@ class ProjectDict(dict):
 
 projects_dict = ProjectDict()
 labels_dict = LabelDict()
-
-
-
-

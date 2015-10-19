@@ -11,7 +11,6 @@ TASK_FORMAT = '{c0}{indent} - {taskid:10} {priority}{c1}{content} {c2}{due}'
 def ulist(l):
     return json.dumps(l).replace(', ', ',')
 
-
 def prepare_task_info(cinfo, due_date=None):
     labels, project = [], None
     if cinfo.get('labels'):
@@ -126,7 +125,6 @@ def query(info, query, stdout=True, output_engine=output.Plain, **options):
 
 def complete_tasks(cinfo):
     ids, ids_normal, ids_recurring = get_taks(cinfo)
-
     if ids_normal:
         api_call('completeItems', ids=ids_normal)
     if ids_recurring:
