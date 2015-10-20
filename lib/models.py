@@ -2,7 +2,12 @@ from datetime import datetime, timedelta
 
 from . import output, cache, api
 
-from settings import OUTPUT_DATE_FORMAT, TIME_OFFSET
+from settings import OUTPUT_DATE_FORMAT
+
+try:
+    from settings import TIME_OFFSET
+except:
+    TIME_OFFSET = 0
 
 class Task(dict):
     def __init__(self, task_raw):
