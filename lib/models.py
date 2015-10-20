@@ -1,8 +1,13 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
-from . import output, cache
+from . import output, cache, api
 
 from settings import OUTPUT_DATE_FORMAT
+
+try:
+    from settings import TIME_OFFSET
+except:
+    TIME_OFFSET = 0
 
 class Task(dict):
     def __init__(self, task_raw):
@@ -20,9 +25,11 @@ class Task(dict):
                                                   '%a %d %b %Y %H:%M:%S')
         self.sort_date = (self.due_date or datetime(1500, 1, 1)).replace(tzinfo=None)
         
-        self.project = task_raw.get('project')
+        self.project = task_raw.get('project_id')
         self.priority = int(task_raw.get('priority', '1'))
         self.labels = task_raw.get('labels', [])
+        self['project_name'] = projects_dict.get(self.project, '')
+        self['label_names']  = ' '.join(map( lambda x: labels_dict.get(x), self.labels ))
         self.content = task_raw.get('content', '')
         self.raw = task_raw
         self.date_string = task_raw.get('date_string', '')
@@ -35,6 +42,8 @@ class Task(dict):
 
     def get_date(self):
         if self.due_date:
+            if TIME_OFFSET:
+                return (self.due_date + timedelta(hours=TIME_OFFSET)).strftime(OUTPUT_DATE_FORMAT)
             return self.due_date.strftime(OUTPUT_DATE_FORMAT)
         return ''
 
@@ -162,3 +171,19 @@ class ResultSet:
         if not dump:
             return None
         return ResultSet(dump['raw'], name=dump['name'], no_save=True)
+
+
+class LabelDict(dict):
+
+    def __init__(self):
+        for name, details in api.api_call('getLabels').items():
+            self[details['id']] = '@' + details['name']
+
+class ProjectDict(dict):
+
+    def __init__(self):
+        for project in api.api_call('getProjects'):
+            self[project['id']] = '#' + project['name']
+
+projects_dict = ProjectDict()
+labels_dict = LabelDict()

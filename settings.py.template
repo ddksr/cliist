@@ -1,9 +1,21 @@
+# API token obtained from ToDoist web site
 API_TOKEN=''
+
+# Display due dates/times in specified format, see:
+#   http://strftime.org/
 OUTPUT_DATE_FORMAT='%d.%m.%Y @ %H:%M:%S'
 
+# ToDoist API returns Date/Times in UTC
+# Apply an offset in hours to these for display in local
+# time. E.g. -6 for US Central Time
+TIME_OFFSET=0
+
+# Caching of the task list - project/label caching not yet implemented 
 CACHE_ENABLED = True
 CACHE = '/tmp/todoist.json'
 
+# Customize display colors using terminal escape codes, see:
+#   http://www.tldp.org/HOWTO/Bash-Prompt-HOWTO/x329.html
 class colors:
     PROJECT = '\033[95m'
     FILTER = '\033[95m'

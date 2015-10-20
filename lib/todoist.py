@@ -1,35 +1,15 @@
-import urllib.parse
-import urllib.request
 import json
 import re
 
-from settings import API_TOKEN
 from . import models, output
 from .utils import CliistException
+from .api import api_call
 
 QUERY_DELIMITER = re.compile(', *')
-API_URL = 'https://api.todoist.com/API'
 TASK_FORMAT = '{c0}{indent} - {taskid:10} {priority}{c1}{content} {c2}{due}'
 
 def ulist(l):
     return json.dumps(l).replace(', ', ',')
-
-
-def api_call(method, **options):
-    options['token'] = API_TOKEN
-    query_string = urllib.parse.urlencode(options,
-                                          safe='',
-                                          errors=None,
-                                          encoding=None)
-    url = "{apiurl}/{method}?{query}".format(apiurl=API_URL,
-                                             method=method,
-                                             query=query_string)
-    try:
-        req = urllib.request.urlopen(url)
-        content = req.read().decode('utf-8')
-        return json.loads(content)
-    except Exception:
-        raise CliistException('Error connecting to Todoist API')
 
 def prepare_task_info(cinfo, due_date=None):
     labels, project = [], None
@@ -61,7 +41,7 @@ def prepare_task_info(cinfo, due_date=None):
         args['date_string'] = due_date
     return labels, project, args
 
-def get_taks(cinfo, task=None):
+def get_task(cinfo, task=None):
     cached = models.ResultSet.load()
     ids_recurring, ids_normal = [], []
     for task_raw in [task] if task else cinfo['raw']:
@@ -144,7 +124,7 @@ def query(info, query, stdout=True, output_engine=output.Plain, **options):
     return result_set
 
 def complete_tasks(cinfo):
-    ids, ids_normal, ids_recurring = get_taks(cinfo)
+    ids, ids_normal, ids_recurring = get_task(cinfo)
     if ids_normal:
         api_call('completeItems', ids=ids_normal)
     if ids_recurring:
@@ -197,10 +177,10 @@ def list_projects(cinfo, stdout=True, do_search=True, reverse=False):
     return result
 
 def list_tasks(cinfo, due_date, stdout=True, output_engine=output.Plain, **options):
-    result = api_call('query', queries=ulist(['overdue','today']))
+    result = api_call('query', queries=ulist(['overdue','today','tomorrow']))
     if cinfo:
         options['search'] = cinfo.get('merged')
-    result_set = models.ResultSet(result, name='Overdue and today', **options)
+    result_set = models.ResultSet(result, name='Overdue, today and tomorrow', **options)
     if stdout:
         result_set.pprint(output_engine=output_engine)
     return result_set
