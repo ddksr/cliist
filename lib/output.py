@@ -1,6 +1,7 @@
 import datetime
 
 from settings import colors
+import xml.etree.ElementTree as ET
 
 class Plain:
     COLORS = {
@@ -114,8 +115,33 @@ class Org:
             Org.task_set(task_set, level=level)
         for task in obj.tasks:
             Org.task(task, level=level)
-            
+
+class Alfred:
+    @staticmethod
+    def task(items, obj):
+        item = ET.SubElement(items, 'item')
+        item.set('uid', str(obj.get('id')))
+        item.set('arg', str(obj.get('id')))
+
+        title = ET.SubElement(item, 'title')
+        title.text = obj.content
+
+    @staticmethod
+    def task_set(items, obj):
+        for task in obj:
+            Alfred.task(items, task)
+
+    @staticmethod
+    def result_set(obj):
+         items = ET.Element('items')
+         for task_set in obj.task_sets:
+             Alfred.task_set(items, task_set)
+         for task in obj.tasks:
+             Alfred.task(items, task)
+         ET.dump(items)
+
 formaters = {
     'plain': Plain,
-    'org': Org
+    'org': Org,
+    'alfred': Alfred
 }
